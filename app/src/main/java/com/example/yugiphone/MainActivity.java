@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -29,7 +30,9 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import org.apache.commons.math3.distribution.HypergeometricDistribution;
+import org.apache.commons.math3.geometry.euclidean.twod.Line;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
@@ -56,29 +59,27 @@ public class MainActivity extends AppCompatActivity {
         SeekBar seekBar = findViewById(R.id.seekBar);
         TextView sliderValue = findViewById(R.id.sliderValue);
         BarChart chart = findViewById(R.id.chart);
+        LineChart chartEx1 = findViewById(R.id.Exact1);
+        LineChart chartEx2 = findViewById(R.id.Exact2);
+        LineChart chartEx3 = findViewById(R.id.Exact3);
+        LineChart chartEx4 = findViewById(R.id.Exact4);
+        updateChartAL(chart, 5);
+        updateChart(chartEx1,5,1,Color.RED);
+        updateChart(chartEx2,5,2,Color.MAGENTA);
+        updateChart(chartEx3,5,3,Color.YELLOW);
+        updateChart(chartEx4,5,4,Color.BLUE);
 
-        updateChart(chart, 5);
-
-        chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
-            @Override
-            public void onValueSelected(Entry e, Highlight h) {
-                float yValue = e.getY();
-                float perc = 100*yValue;
-                String formatted = String.format("%.2f", perc);
-                Toast.makeText(MainActivity.this, "Y Value: " + formatted + "%", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onNothingSelected() {
-            }
-        });
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (progress == 0) progress = 1;
                 sliderValue.setText("Hand size: " + progress);
-                updateChart(chart, progress);
+                updateChartAL(chart, progress);
+                updateChart(chartEx1,progress,1,Color.RED);
+                updateChart(chartEx2,progress,2,Color.MAGENTA);
+                updateChart(chartEx3,progress,3,Color.YELLOW);
+                updateChart(chartEx4,progress,4,Color.BLUE);
             }
 
             @Override
@@ -90,11 +91,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    private double calculateProbability(int handSize, int numCopies) {
-        // Calculate the probability of drawing at least 1 card of a specific type with `numCopies` in a deck of `DECK_SIZE` cards
-        int remainingCards = DECK_SIZE - numCopies; // Remaining cards excluding the copies we are interested in
-        int totalCardsToDraw = handSize; // The hand size (how many cards we draw)
-
+    private double calculateProbabilityBar(int handSize, int numCopies) {
         // Create the hypergeometric distribution for the deck and the number of copies of a card
         HypergeometricDistribution hyper = new HypergeometricDistribution(DECK_SIZE, numCopies, handSize);
 
@@ -104,9 +101,18 @@ public class MainActivity extends AppCompatActivity {
         // Return the probability of drawing at least 1 copy by subtracting the probability of drawing 0 copies
         return 1 - probNotDrawing;
     }
+    private double calculateProbability(int handSize, int numCopies,int num) {
+        // Create the hypergeometric distribution for the deck and the number of copies of a card
+        HypergeometricDistribution hyper = new HypergeometricDistribution(DECK_SIZE, numCopies, handSize);
 
+        // Calculate the probability of drawing 0 copies (not drawing any of the copies)
+        double probNotDrawing = hyper.probability(num);
 
-    private void setAxis(BarChart barChart) {
+        // Return the probability of drawing at least 1 copy by subtracting the probability of drawing 0 copies
+        return probNotDrawing;
+    }
+
+    private void setAxisBar(BarChart barChart) {
         // Set up X-Axis labels
         XAxis xAxis = barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -114,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         xAxis.setAxisMaximum(4f);   // Set maximum to 4 to cover the range from 0 to 3 (4 bars)
         xAxis.setTextSize(18f);
         xAxis.setGranularity(1f);  // Only 1 value between intervals
-        xAxis.setTextColor(Color.WHITE);  // Set color for x-axis labels
+        xAxis.setDrawGridLines(false);
 
         // Set X-Axis labels corresponding to indices 1, 2, 3, 4
         xAxis.setValueFormatter(new IndexAxisValueFormatter(new String[]{"1", "2", "3", "4"}));  // X-Axis labels
@@ -124,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
         leftAxis.setAxisMinimum(0f);  // Start at 0 on the Y-Axis (0% = 0)
         leftAxis.setAxisMaximum(1f);  // End at 100% on the Y-Axis (1.0 corresponds to 100%)
         leftAxis.setGranularity(0.1f);  // Set steps of 10% (0.1 = 10%, 0.2 = 20%, etc.)
-        leftAxis.setTextColor(Color.WHITE);  // Set color for y-axis labels
         leftAxis.setLabelCount(11, true);
 
         // Adjust Y-Axis to show 10% intervals (formatted as percentages)
@@ -134,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                 return (int)(value * 100) + "%";  // Convert to percentage format
             }
         });
-
+        leftAxis.setDrawGridLines(false);
         // To ensure the Y-Axis shows 10% steps and the labels fit within the desired range
         leftAxis.setSpaceTop(10f);  // Adds a little space at the top
         leftAxis.setSpaceBottom(10f);  // Adds a little space at the bottom
@@ -145,36 +150,123 @@ public class MainActivity extends AppCompatActivity {
 
         // Set chart description (Optional)
         barChart.getDescription().setEnabled(false);  // Disable description
-
         // Center the labels on the bars
         barChart.getBarData().setBarWidth(0.7f);  // Adjust bar width to ensure they're well spaced
         barChart.setFitBars(true);  // Fit bars to the chart
     }
+    private void setAxisLine(LineChart lineChart) {
+        // Set up X-Axis labels
+        XAxis xAxis = lineChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setAxisMinimum(-1f);  // Ensure the minimum value aligns with the first point
+        xAxis.setAxisMaximum(4f);   // Set maximum to 4 to cover the range from 0 to 3 (4 points)
+        xAxis.setTextSize(18f);
+        xAxis.setGranularity(1f);  // Only 1 value between intervals
+        xAxis.setDrawGridLines(false);
+
+        // Set X-Axis labels corresponding to indices 1, 2, 3, 4
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(new String[]{"1", "2", "3", "4"}));  // X-Axis labels
+
+        // Set up Y-Axis
+        YAxis leftAxis = lineChart.getAxisLeft();
+        leftAxis.setAxisMinimum(0f);  // Start at 0 on the Y-Axis (0% = 0)
+        leftAxis.setAxisMaximum(1f);  // End at 100% on the Y-Axis (1.0 corresponds to 100%)
+        leftAxis.setGranularity(0.1f);  // Set steps of 10% (0.1 = 10%, 0.2 = 20%, etc.)
+        leftAxis.setLabelCount(11, true);
+
+        // Adjust Y-Axis to show 10% intervals (formatted as percentages)
+        leftAxis.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return (int)(value * 100) + "%";  // Convert to percentage format
+            }
+        });
+        leftAxis.setDrawGridLines(false);
+        // To ensure the Y-Axis shows 10% steps and the labels fit within the desired range
+        leftAxis.setSpaceTop(10f);  // Adds a little space at the top
+        leftAxis.setSpaceBottom(10f);  // Adds a little space at the bottom
+
+        // Disable right axis (Optional)
+        YAxis rightAxis = lineChart.getAxisRight();
+        rightAxis.setEnabled(false);
+
+        // Set chart description (Optional)
+        lineChart.getDescription().setEnabled(false);  // Disable description
+
+        // Set up the LineData and adjust line properties (Optional)
+        LineData lineData = lineChart.getData();
+        if (lineData != null) {
+            LineDataSet dataSet = (LineDataSet) lineData.getDataSetByIndex(0);  // Assuming there's only one data set
+            dataSet.setLineWidth(6f);  // Adjust the line width
+            dataSet.setCircleRadius(4f);  // Adjust the circle size on data points
+            dataSet.setDrawCircles(true);  // Enable circles for data points
+            dataSet.setValueTextSize(10f);
+           // dataSet.setDrawValues(false);  // Disable values on data points
+        }
+
+        // Fit the chart to the data
+        lineChart.invalidate();  // Refresh the chart
+    }
 
 
-    private void updateChart(BarChart chart, int handSize) {
+
+    private void updateChartAL(BarChart chart, int handSize) {
         // Create data points for the chart, representing probability of drawing 1...n copies from 40 cards
         List<BarEntry> entries = new ArrayList<>();
 
-        // Loop over possible number of copies (from 1 to MAX_CARDS, which is now 6 copies of a card in the deck)
+        // Loop over possible number of copies (from 1 to MAX_CARDS)
         for (int i = 1; i <= MAX_CARDS; i++) {
-            // Calculate the probability of drawing at least 1 card out of `i` copies with a hand of size `handSize`
-            double probability = calculateProbability(handSize, i);
-            entries.add(new BarEntry(i - 1, (float) probability)); // Add entry for (number of copies, probability) (i-1 to match indices)
+            double probability = calculateProbabilityBar(handSize, i);
+            entries.add(new BarEntry(i - 1, (float) probability));
         }
 
-        // Create a dataset and line data for the chart
+        // Create a dataset for the bar chart
         BarDataSet dataSet = new BarDataSet(entries, "Drawing at least 1");
         dataSet.setValueTextSize(18f);
         BarData barData = new BarData(dataSet);
-        barData.setBarWidth(0.5f);  // Adjust the bar width to fit 4 bars
-
-        // Set the new data to the chart and invalidate it to redraw
         chart.setData(barData);
+        chart.setTouchEnabled(false);
+        chart.setDrawGridBackground(false);
+        barData.setValueFormatter(new PercentFormatter());
 
-        // Update the chart's axis settings
-        setAxis(chart);
+        // Set axis, legend and refresh the chart
+        setAxisBar(chart);
+        chart.getLegend().setEnabled(false);
         chart.invalidate(); // Refresh the chart
     }
 
+    private void updateChart(LineChart chart, int handSize, int number,int Color) {
+        List<Entry> entries = new ArrayList<>();
+
+        for (int i = 1; i <= MAX_CARDS; i++) {
+            double probability = calculateProbability(handSize, i, number);
+            entries.add(new BarEntry(i - 1, (float) probability));
+        }
+
+        LineDataSet dataSet = new LineDataSet(entries, "Drawing Exactly " + number);
+        dataSet.setValueTextSize(18f);
+        dataSet.setColor(Color);
+        chart.setDragEnabled(false);
+        chart.setScaleEnabled(false);
+
+        LineData lineData = new LineData(dataSet);
+        chart.setData(lineData);
+        chart.setDrawGridBackground(false);
+        dataSet.setDrawValues(true);
+        lineData.setValueFormatter(new PercentFormatter());
+
+        // Set axis, legend and refresh the chart
+        setAxisLine(chart);
+        chart.getLegend().setEnabled(false);
+        chart.invalidate(); // Refresh the chart
+    }
+
+    public class PercentFormatter extends ValueFormatter {
+        private DecimalFormat df = new DecimalFormat("###,###,##0.00%");
+
+        @Override
+        public String getFormattedValue(float value) {
+            return df.format(value);
+        }
+    }
 }

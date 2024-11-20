@@ -9,11 +9,157 @@
     android:gravity="center"
     tools:context=".MainActivity">
 
-    <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/chart"
+    <!-- FrameLayout to contain both charts on top of each other -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.8" />
+        android:layout_weight="0.8">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="210dp"
+        android:layout_weight="0.1"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:layout_gravity="right"
+        android:gravity="right">
+
+    <!-- Light Blue Rectangle -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:gravity="right"
+        android:orientation="horizontal"
+        android:padding="4dp">
+        <View
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="4dp"
+            android:background="#ADD8E6" /> <!-- Light Blue -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="At least 1"
+            android:textSize="12sp"
+            android:gravity="center_vertical" />
+    </LinearLayout>
+
+    <!-- Red Rectangle -->
+    <LinearLayout
+        android:layout_gravity="right"
+        android:gravity="right"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="4dp">
+        <View
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="4dp"
+            android:background="#FF0000" /> <!-- Red -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Exactly 1"
+            android:textSize="12sp"
+            android:gravity="center_vertical" />
+    </LinearLayout>
+
+    <!-- Yellow Rectangle -->
+    <LinearLayout
+        android:layout_gravity="right"
+        android:gravity="right"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="4dp">
+        <View
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="4dp"
+            android:background="#FF00FF" /> <!-- Yellow -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Exactly 2"
+            android:textSize="12sp"
+            android:gravity="center_vertical" />
+    </LinearLayout>
+
+    <!-- Magenta Rectangle -->
+    <LinearLayout
+        android:layout_gravity="right"
+        android:gravity="right"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="4dp">
+        <View
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="4dp"
+            android:background="#FFFF00"  /> <!-- Magenta -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Exactly 3"
+            android:textSize="12sp"
+            android:gravity="center_vertical" />
+    </LinearLayout>
+
+    <!-- Green Rectangle -->
+    <LinearLayout
+        android:layout_gravity="right"
+        android:gravity="right"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="4dp">
+        <View
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="4dp"
+            android:background="#0066FF" /> <!-- Green -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Exactly 4"
+            android:textSize="12sp"
+            android:gravity="center_vertical" />
+    </LinearLayout>
+
+</LinearLayout>
+
+    <!-- BarChart (existing one) -->
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/chart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- LineChart to overlay on top of the BarChart -->
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/Exact1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/Exact2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/Exact3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/Exact4"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
     <TextView
         android:id="@+id/TitleX"
         android:layout_width="wrap_content"
